@@ -1,9 +1,17 @@
 import React, { useState, useRef } from "react";
 import Spinner from "../Ui/Spinner";
-import { Col, Button, Row, Container, Card, Form } from "react-bootstrap";
+import { Col, Button, Row, Card, Form } from "react-bootstrap";
+import {useNavigate} from 'react-router-dom';
+import {useDispatch} from 'react-redux';
+import { authActions } from "../store/AuthSlice";
+import classes from "./AuthForm.module.css";
 
 function AuthForm() {
+
+     const navigate = useNavigate();
+     const dispatch = useDispatch();
   const [isLoading, setisLoading] = useState(false);
+  const [isLogin, setLogin] = useState(true);
 
   const emailInput = useRef();
   const passwordInput = useRef();
@@ -13,15 +21,11 @@ function AuthForm() {
     e.preventDefault();
     const enteredEmail = emailInput.current.value;
     const enteredPassword = passwordInput.current.value;
-    const enteredConfirmPassword = confirmPasswordInput.current.value;
     setisLoading(true);
-    if (enteredPassword !== enteredConfirmPassword) {
-      alert("Password does not match with confirm password");
-      setisLoading(false);
-    } else {
+    if (isLogin) {
       try {
-        const res = await fetch(
-          "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyASHKaq4NlTpzxGNdPos9sAms1-QX54hzs",
+        const response = await fetch(
+          "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyASHKaq4NlTpzxGNdPos9sAms1-QX54hzs",
           {
             method: "POST",
             body: JSON.stringify({
@@ -35,59 +39,100 @@ function AuthForm() {
           }
         );
         setisLoading(false);
-
-        if (!res.ok) {
-          throw new Error("SignUp failed, Please try again...");
+        if (!response.ok) {
+          throw new Error("Authentication Failed");
         }
+        const data = await response.json();
+        dispatch(authActions.login({
+            email: data.email,
+            idToken: data.idToken
+        }));
+        navigate('/welcome');
+        console.log(data.email, data.idToken);
 
-        const data = await res.json();
-        console.log("User has successfully signed up");
-        console.log(data.email);
-        alert("Account Created successfully");
+
       } catch (err) {
         alert(err.message);
       }
-    };
-    emailInput.current.value = '';
-    passwordInput.current.value= '';
-    confirmPasswordInput.current.value= '';
+    } else {
+        const enteredConfirmPassword = confirmPasswordInput.current.value;
+      if (enteredPassword !== enteredConfirmPassword) {
+        alert("Password does not match with confirm password");
+        setisLoading(false);
+      } else {
+        try {
+          const res = await fetch(
+            "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyASHKaq4NlTpzxGNdPos9sAms1-QX54hzs",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                email: enteredEmail,
+                password: enteredPassword,
+                returnSecureToken: true,
+              }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          setisLoading(false);
+
+          if (!res.ok) {
+            throw new Error("SignUp failed, Please try again...");
+          }
+
+          const data = await res.json();
+          console.log("User has successfully signed up");
+          console.log(data.email);
+          alert("Account Created successfully");
+          setLogin(true);
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+    }
+    emailInput.current.value = "";
+    passwordInput.current.value = "";
+  };
+
+  const toggleHandler = () => {
+    setLogin((prev) => !prev);
   };
 
   return (
-    <div>
-      <Container>
-        <Row className="vh-100 d-flex justify-content-center align-items-center ">
-          <Col md={8} lg={4} xs={12}>
-            <Card className="px-2">
-              <Card.Body>
-                <div className="mb-3 mt-md-4">
-                  <h2 className="fw-bold mb-2 text-center">Sign Up</h2>
-                  <div className="mb-3">
-                    <Form onSubmit={submitHandler}>
-                      <Form.Group className="mb-3" controlId="formBasicEmail">
-                        <Form.Label className="text-center">
-                          Email address
-                        </Form.Label>
-                        <Form.Control
-                          type="email"
-                          placeholder="Enter email"
-                          ref={emailInput}
-                          required
-                        />
-                      </Form.Group>
+    <div className={classes.container}>
+      <Row className="vh-100 d-flex justify-content-center align-items-center ">
+        <Col md={7} lg={4} xs={12}>
+          <Card className="px-4">
+            <Card.Body>
+              <div className="mb-3 mt-md-4">
+                <h2 className="fw-bold mb-2 text-center">
+                  {isLogin ? "Login" : "Sign Up"}
+                </h2>
+                <div className="mb-3">
+                  <Form onSubmit={submitHandler}>
+                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                      <Form.Label className="text-center">
+                        Email address
+                      </Form.Label>
+                      <Form.Control
+                        type="email"
+                        placeholder="Enter email"
+                        ref={emailInput}
+                        required
+                      />
+                    </Form.Group>
 
-                      <Form.Group
-                        className="mb-3"
-                        controlId="formBasicPassword"
-                      >
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control
-                          type="password"
-                          placeholder="Password"
-                          ref={passwordInput}
-                          required
-                        />
-                      </Form.Group>
+                    <Form.Group className="mb-3" controlId="formBasicPassword">
+                      <Form.Label>Password</Form.Label>
+                      <Form.Control
+                        type="password"
+                        placeholder="Password"
+                        ref={passwordInput}
+                        required
+                      />
+                    </Form.Group>
+                    {!isLogin && (
                       <Form.Group
                         className="mb-3"
                         controlId="formBasicPasswords"
@@ -100,32 +145,40 @@ function AuthForm() {
                           required
                         />
                       </Form.Group>
-                      <Form.Group
-                        className="mb-3"
-                        controlId="formBasicCheckbox"
-                      ></Form.Group>
-                      <div className="d-grid">
-                        {!isLoading && (
-                          <Button variant="primary" type="submit">
-                            Create Account
-                          </Button>
-                        )}
-                        {isLoading && <Spinner />}
-                      </div>
-                    </Form>
-                    <div className="mt-3">
-                      <p className="mb-0  text-center">
-                        Already have an account??{" "}
-                        <Button  variant="link" className=" fw-bold">Sign In</Button>
-                      </p>
+                    )}
+                    <Form.Group
+                      className="mb-3"
+                      controlId="formBasicCheckbox"
+                    ></Form.Group>
+                    <div className="d-grid justify-content-center">
+                      {!isLoading && (
+                        <Button variant="primary" type="submit">
+                          {isLogin ? "Sign in" : "Create Account"}
+                        </Button>
+                      )}
+                      {isLoading && <Spinner />}
                     </div>
+                  </Form>
+                  <div className="mt-3">
+                    <p className="mb-0  text-center">
+                      {isLogin
+                        ? "Don't have an account?"
+                        : "Already have an account??"}{" "}
+                      <Button
+                        onClick={toggleHandler}
+                        variant="link"
+                        className=" fw-bold"
+                      >
+                        {isLogin ? "Sign up" : "Sign in"}
+                      </Button>
+                    </p>
                   </div>
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }
