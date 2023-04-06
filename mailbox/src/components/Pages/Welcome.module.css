@@ -1,0 +1,20 @@
+.wrapperclass {
+    padding: 1rem;
+    margin: auto;
+    height: 15rem;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .editorclass {
+    background-color:rgb(255, 255, 255);
+    padding: 1rem;
+    border: 1px solid #c3bebe;
+  }
+  .toolbarclass {
+    border: 1px solid #ffffff;
+    
+  }
+
+  hr {
+    border: 1px solid black;
+  }

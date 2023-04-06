@@ -102,8 +102,8 @@ function AuthForm() {
   return (
     <div className={classes.container}>
       <Row className="vh-100 d-flex justify-content-center align-items-center ">
-        <Col md={7} lg={4} xs={12}>
-          <Card className="px-4">
+        <Col md={8} lg={3} xs={11}>
+          <Card className="px-2">
             <Card.Body>
               <div className="mb-3 mt-md-4">
                 <h2 className="fw-bold mb-2 text-center">
@@ -159,7 +159,7 @@ function AuthForm() {
                       {isLoading && <Spinner />}
                     </div>
                   </Form>
-                  <div className="mt-3">
+                  <div className="mt-3 border border-info">
                     <p className="mb-0  text-center">
                       {isLogin
                         ? "Don't have an account?"
