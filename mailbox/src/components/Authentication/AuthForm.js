@@ -47,7 +47,7 @@ function AuthForm() {
             email: data.email,
             idToken: data.idToken
         }));
-        navigate('/welcome');
+        navigate('/sidebar');
         console.log(data.email, data.idToken);
 
 

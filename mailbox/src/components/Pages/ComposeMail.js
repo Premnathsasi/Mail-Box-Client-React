@@ -3,47 +3,62 @@ import { Editor } from "react-draft-wysiwyg";
 import { Col, Form, Row, Card, Button } from "react-bootstrap";
 import { EditorState } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import classes from "./Welcome.module.css";
+import classes from "./ComposeMail.module.css";
 
-const Welcome = () => {
+const ComposeMail = () => {
   const toRef = useRef();
   const subjectRef = useRef();
-  const emailID = localStorage.getItem('email');
-  const cleanMail = emailID.replace(/[@.]/g, "");
+  const emailID = JSON.parse(localStorage.getItem("email"));
+  const senderMail = emailID.replace(/[@.]/g, "");
 
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
 
-  const submitHandler = async(e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     const enteredToMail = toRef.current.value;
     const enteredSubject = subjectRef.current.value;
+    const receiverMail = enteredToMail.replace(/[@.]/g, "");
+    const mailData = {
+      to: enteredToMail,
+      from: emailID,
+      subject: enteredSubject,
+      composedMail: editorState.getCurrentContent().getPlainText(),
+    };
     try {
-      const res = await fetch('https://mail-box-8b0df-default-rtdb.firebaseio.com/mail.json', {
-        method: 'POST',
-        body: JSON.stringify({
-          to: enteredToMail,
-          from: emailID,
-          subject: enteredSubject,
-          composedMail: editorState.getCurrentContent().getPlainText(),
-        }),
-        headers: {
-          'Content-Type': 'application/json'
+      const res = await fetch(
+        `https://mail-box-8b0df-default-rtdb.firebaseio.com/${senderMail}sentItems.json`,
+        {
+          method: "POST",
+          body: JSON.stringify(mailData),
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      })
+      );
+
+      await fetch(`https://mail-box-8b0df-default-rtdb.firebaseio.com/${receiverMail}.json`,{
+        method: "POST",
+        body: JSON.stringify(mailData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       const data = await res.json();
-      if(res.ok) {
-        console.log(data)
+      if (res.ok) {
+        console.log(data);
       } else {
-        throw new Error('Sending Failed')
+        throw new Error("Sending Failed");
       }
-    } catch(err)  {
-      console.log(err.message)
+    } catch (err) {
+      console.log(err.message);
     }
+    toRef.current.value = "";
+    subjectRef.current.value = "";
+    setEditorState(EditorState.createEmpty());
   };
-  
 
   return (
     <React.Fragment>
@@ -88,7 +103,9 @@ const Welcome = () => {
                 />
               </Form.Group>
               <div className="d-flex justify-content-center mb-3">
-                <Button variant="success" type="submit" >Send Mail</Button>
+                <Button variant="success" type="submit">
+                  Send Mail
+                </Button>
               </div>
             </Form>
           </Card>
@@ -98,4 +115,4 @@ const Welcome = () => {
   );
 };
 
-export default Welcome;
+export default ComposeMail;
