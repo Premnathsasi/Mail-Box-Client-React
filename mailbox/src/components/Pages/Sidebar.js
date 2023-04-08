@@ -39,19 +39,20 @@ const SideBar = () => {
           `https://mail-box-8b0df-default-rtdb.firebaseio.com/${cleanMail}.json`
         );
         const data = await res.json();
-        
+        let count = 0
         for (const key in data) {
           if (data[key].read === false) {
-            setCounter(counter + 1);
+            count++;
         }
         }
+        setCounter(count)
         console.log(counter);
       } catch (err) {
         console.log(err.message);
       }
     };
     getItems();
-  },[cleanMail]);
+  });
     return (
         <React.Fragment>
             <div className="container-fluid">

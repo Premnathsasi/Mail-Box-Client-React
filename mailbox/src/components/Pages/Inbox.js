@@ -1,15 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import MailData from "./MailData";
-import { Container } from "react-bootstrap";
+import { CloseButton, Container } from "react-bootstrap";
 import MailView from "./MailView";
 
-
 const Inbox = () => {
-  const [emailData, setEmailData] = useState([]);
+  const [emailData, setEmailData] = useState({});
   const [viewInbox, setViewInbox] = useState(true);
   const [viewMail, setViewMail] = useState("");
   const mailId = JSON.parse(localStorage.getItem("email"));
   const cleanMail = mailId.replace(/[@.]/g, "");
+
+  const deleteHandler = useCallback( async (event) => {
+    const result = window.confirm("Are you sure you want to delete?");
+    if (result === true) {
+      try {
+        const res = await fetch(
+          `https://mail-box-8b0df-default-rtdb.firebaseio.com/${cleanMail}/${event.currentTarget.id}.json`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (res.ok) {
+          console.log("Deleted Successfully");
+        }
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+  });
 
   useEffect(() => {
     const getItems = async () => {
@@ -28,7 +46,7 @@ const Inbox = () => {
       }
     };
     getItems();
-  }, [cleanMail, viewInbox]);
+  }, [cleanMail, viewInbox, deleteHandler]);
 
   const mailViewHandler = (event) => {
     setViewMail({
@@ -46,21 +64,29 @@ const Inbox = () => {
   const dataList = emailData ? (
     <ul>
       {Object.keys(emailData).map((item) => (
-        <li
-          style={{
-            fontWeight: emailData[item].read ? "" : "bold",
-            border: emailData[item].read ? '1px solid black': '2px solid black',
-            borderRadius: '5px',
-            marginBottom: "5px",
-            listStyle: emailData[item].read ? "none" : "",
-          }}
-          onClick={mailViewHandler}
-          id={item}
+        <div
+          className="d-flex justify-content-evenly align-items-center row"
           key={item}
         >
-          {" "}
-          <MailData mail={emailData[item]} mailId={emailData[item].from} />
-        </li>
+          <li
+            className="col-10"
+            style={{
+              fontWeight: emailData[item].read ? "" : "bold",
+              border: emailData[item].read
+                ? "1px solid black"
+                : "2px solid black",
+              borderRadius: "5px",
+              marginBottom: "5px",
+              listStyle: emailData[item].read ? "none" : "",
+            }}
+            onClick={mailViewHandler}
+            id={item}
+          >
+            {" "}
+            <MailData mail={emailData[item]} mailId={emailData[item].from} />
+          </li>
+          <CloseButton className="col-2" id={item} onClick={deleteHandler} />
+        </div>
       ))}
     </ul>
   ) : (
