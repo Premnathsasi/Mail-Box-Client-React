@@ -10,30 +10,26 @@ const SentItems = () => {
   const mailId = JSON.parse(localStorage.getItem("email"));
   const cleanMail = mailId.replace(/[@.]/g, "");
 
-
-  const deleteHandler =useCallback(async (event) => {
-    const result =window.confirm('Are you sure you want to delete?');
-      if (result === true) {
-        try {
-      
-          const res = await fetch(
-            `https://mail-box-8b0df-default-rtdb.firebaseio.com/${cleanMail}sentItems/${event.currentTarget.id}.json`,
-            {
-              method: "DELETE",
-            }
-          );
-          const data = await res.json();
-          if (res.ok) {
-            console.log("Deleted Successfully");
-            setEmailData(data);
+  const deleteHandler = useCallback(async (event) => {
+    const result = window.confirm("Are you sure you want to delete?");
+    if (result === true) {
+      try {
+        const res = await fetch(
+          `https://mail-box-8b0df-default-rtdb.firebaseio.com/${cleanMail}sentItems/${event.currentTarget.id}.json`,
+          {
+            method: "DELETE",
           }
-        } catch (err) {
-          console.log(err.message);
+        );
+        const data = await res.json();
+        if (res.ok) {
+          console.log("Deleted Successfully");
+          setEmailData(data);
         }
+      } catch (err) {
+        console.log(err.message);
       }
-    
+    }
   });
-
 
   useEffect(() => {
     const getItems = async () => {
@@ -66,7 +62,6 @@ const SentItems = () => {
     setViewMail("");
     setViewsent(true);
   };
-
 
   const dataList = emailData ? (
     <ul>

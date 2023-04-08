@@ -10,7 +10,7 @@ const Inbox = () => {
   const mailId = JSON.parse(localStorage.getItem("email"));
   const cleanMail = mailId.replace(/[@.]/g, "");
 
-  const deleteHandler = useCallback( async (event) => {
+  const deleteHandler = useCallback(async (event) => {
     const result = window.confirm("Are you sure you want to delete?");
     if (result === true) {
       try {
@@ -30,7 +30,7 @@ const Inbox = () => {
   });
 
   useEffect(() => {
-    const getItems = async () => {
+    const interval = setInterval(async () => {
       try {
         const res = await fetch(
           `https://mail-box-8b0df-default-rtdb.firebaseio.com/${cleanMail}.json`
@@ -44,8 +44,8 @@ const Inbox = () => {
       } catch (err) {
         console.log(err.message);
       }
-    };
-    getItems();
+    }, 2000);
+    return () => clearInterval(interval);
   }, [cleanMail, viewInbox, deleteHandler]);
 
   const mailViewHandler = (event) => {
