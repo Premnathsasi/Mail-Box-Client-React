@@ -15,7 +15,7 @@ function Header() {
     };
 
   return (
-    <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark"> 
+    <Navbar collapseOnSelect expand="lg" bg="secondary" variant="dark"> 
       <Container>
         <Navbar.Brand className='fs-3 fw-bold'>Mail-Box</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />

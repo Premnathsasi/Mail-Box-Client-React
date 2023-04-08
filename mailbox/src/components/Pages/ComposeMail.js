@@ -25,6 +25,7 @@ const ComposeMail = () => {
       from: emailID,
       subject: enteredSubject,
       composedMail: editorState.getCurrentContent().getPlainText(),
+      read: false,
     };
     try {
       const res = await fetch(

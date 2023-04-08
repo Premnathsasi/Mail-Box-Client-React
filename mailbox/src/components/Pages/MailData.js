@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 
-import classes from './MailData.module.css';
+import classes from "./MailData.module.css";
+import { Container } from "react-bootstrap";
 
 const MailData = (props) => {
   return (
-    <div className={classes.main}>
-        <i className='ri-user-shared-fill'></i>
+    <Container className="row" onClick={props.onClick}>
+      <div className={classes.main}>
         <div className={classes.mailId}>{props.mailId}</div>
-     
-      <span className={classes.title}>{props.mail.subject}</span>
-      <span className={classes.body}>{props.mail.composedMail}</span>
-    </div>
+        <span className={classes.title}>{props.mail.subject}</span>
+      </div>  
+    </Container>
   );
 };
 
